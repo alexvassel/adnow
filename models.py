@@ -23,7 +23,7 @@ class Repo(Base):
 
 
 class Commit(Base):
-    author = peewee.CharField(max_length=20)
+    author = peewee.CharField(max_length=20, null=True)
     message = peewee.CharField(null=True)
     date_added = peewee.DateTimeField()
     sha = peewee.CharField(max_length=40)

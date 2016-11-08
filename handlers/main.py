@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-import urllib.parse
+import json
 
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 
 import forms
-from helpers import PeeweeRequestHandler, GHUB_URL
+from helpers import (PeeweeRequestHandler, GHUB_URL, API_PATTERN, GITHUB_USERAGENT,
+                     get_commit_from_json)
 import models
 
 
@@ -19,6 +20,7 @@ class Repos(PeeweeRequestHandler):
 
 class CreateRepo(PeeweeRequestHandler):
     title = 'Добавить репозиторий'
+    response = None
 
     def get(self):
         self.render('create.html', title=self.title, form=forms.AddRepoForm())
@@ -30,8 +32,23 @@ class CreateRepo(PeeweeRequestHandler):
         if not form.validate():
             self.render('create.html', title=self.title, form=form)
 
-        print(GHUB_URL.match(form.href.data).groups())
+        owner_name, repo_name = GHUB_URL.match(form.href.data).groups()
 
-        url = 'http://ya.ru'
-        http_client = AsyncHTTPClient()
-        response = yield http_client.fetch(url)
+        r = models.Repo(name=repo_name, owner_name=owner_name, href=form.href.data)
+
+        url = API_PATTERN.format(owner_name, repo_name)
+
+        yield self.get_commits(url)
+
+        response = json.loads(self.response.body.decode())
+
+        for commit in get_commit_from_json(response):
+            print(commit)
+
+        self.redirect(self.reverse_url('index'))
+
+    @gen.coroutine
+    def get_commits(self, url):
+        # https://developer.github.com/v3/#user-agent-required
+        http_client = AsyncHTTPClient(defaults=dict(user_agent=GITHUB_USERAGENT))
+        self.response = yield http_client.fetch(url)
