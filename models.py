@@ -12,7 +12,7 @@ database = peewee.SqliteDatabase(DB)
 class Base(peewee.Model):
     class Meta:
         database = database
-        indexes = ((('date_added',), True),)
+        indexes = ((('date_added',), False),)
 
 
 class Repo(Base):

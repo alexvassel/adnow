@@ -31,11 +31,14 @@ def create_tables():
     database.create_tables([Repo, Commit])
 
 
-def get_commit_from_json(jsn):
+def get_commit_from_json(jsn, repo):
     for commit in jsn:
-        author = commit.get('author').get('login') if commit.get('author') is not None else None
-        message = commit.get('commit').get('message') if commit.get('commit') is not None else None
-        yield dict(author=author, message=commit.get('message'))
+        cmt = commit.get('commit')
+        author = cmt.get('author').get('name') if cmt.get('author') else None
+        message = commit.get('commit').get('message')
+        sha = commit['sha']
+        date_added = cmt.get('author').get('date') if cmt.get('author') else None
+        yield dict(author=author, message=message, sha=sha, date_added=date_added, repo=repo)
 
 
 if __name__ == '__main__':

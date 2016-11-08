@@ -34,7 +34,7 @@ class CreateRepo(PeeweeRequestHandler):
 
         owner_name, repo_name = GHUB_URL.match(form.href.data).groups()
 
-        r = models.Repo(name=repo_name, owner_name=owner_name, href=form.href.data)
+        repo = models.Repo(name=repo_name, owner_name=owner_name, href=form.href.data)
 
         url = API_PATTERN.format(owner_name, repo_name)
 
@@ -42,8 +42,9 @@ class CreateRepo(PeeweeRequestHandler):
 
         response = json.loads(self.response.body.decode())
 
-        for commit in get_commit_from_json(response):
-            print(commit)
+        with models.database.atomic():
+            repo.save()
+            models.Commit.insert_many(get_commit_from_json(response, repo=repo)).execute()
 
         self.redirect(self.reverse_url('index'))
 
