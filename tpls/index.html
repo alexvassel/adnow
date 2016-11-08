@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% end %}
+{% block body %}
+    <h1>Репозитории</h1>
+    <br/>
+
+    <table class="table">
+      <thead>
+          <tr><th>Имя</th><th>Дата создания</th></tr>
+      </thead>
+      {% for repo in repos %}
+        <tr>
+          <td>{{repo.name}}</td>
+           <td>{{repo.date_added}}</td>
+        </tr>
+      {% end %}
+    </table>
+    <a class="btn btn-default" href="{{reverse_url('create_repo')}}" role="button">Добавить репозиторий</a>
+{% end %}

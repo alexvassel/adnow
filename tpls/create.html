@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% end %}
+{% block body %}
+    <h1>Сохранить новый репозиторий</h1>
+    <form method="POST" action="">
+        <div class="form-group"><label>{{ form.href.label.text }}</label> {{ form.href(class_="form-control") }}</div>
+            {% if form.href.errors %}
+                <ul class="errors">{% for error in form.href.errors %}<li>{{ error }}</li>{% end %}</ul>
+            {% end %}
+        <br/>
+        <input class="btn btn-default" type="submit" value="Сохранить"/>
+    </form>
+{% end %}
