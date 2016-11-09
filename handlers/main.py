@@ -59,7 +59,8 @@ class CreateRepo(PeeweeRequestHandler):
 
     @gen.coroutine
     def get_commits(self, url):
-        """получения коммитов репозитория вынесено"""
+        """получение коммитов репозитория вынесено"""
+        # API отдает последние 30
         # https://developer.github.com/v3/#user-agent-required
         http_client = AsyncHTTPClient(defaults=dict(user_agent=GITHUB_USERAGENT))
         self.response = yield http_client.fetch(url)
