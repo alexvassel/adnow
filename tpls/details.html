@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% end %}
+{% block body %}
+    <h1>Коммиты репозитория {{repo.name}}</h1>
+    <br/>
+    <table class="table">
+      <thead>
+          <tr><th>Автор</th><th>Дата создания</th><th>Сообщение</th></tr>
+      </thead>
+      {% for commit in repo.commits.order_by(commit_model.date_added.desc()) %}
+        <tr>
+          <td>{{commit.author}}</td>
+            <td>{{commit.date_added}}</td>
+            <td>{{commit.message}}</td>
+        </tr>
+      {% end %}
+    </table>
+{% end %}

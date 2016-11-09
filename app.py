@@ -3,14 +3,12 @@
 from tornado import ioloop, httpserver, web
 
 from handlers import main
-
-APP_SETTINGS = {'template_path': 'tpls', 'debug': True,
-                'cookie_secret': 'some_secret', 'autoescape': None}
+from helpers import APP_SETTINGS
 
 application = web.Application([
                 web.URLSpec(r'/', main.Repos, name='index'),
-                web.URLSpec(r'/repos/create', main.CreateRepo, name='create_repo'),
-                (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'})
+                web.URLSpec(r'/repos/create', main.CreateRepo, name='create'),
+                web.URLSpec(r'/repos/(\d+)', main.RepoDetails, name='details'),
     ], **APP_SETTINGS)
 
 http_server = httpserver.HTTPServer(application)

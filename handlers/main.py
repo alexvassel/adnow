@@ -18,6 +18,14 @@ class Repos(PeeweeRequestHandler):
         self.render('index.html', title=self.title, repos=repos)
 
 
+class RepoDetails(PeeweeRequestHandler):
+    title = 'Коммиты репозитория'
+
+    def get(self, repo_id):
+        repo = models.Repo.get(id=repo_id)
+        self.render('details.html', title=self.title, repo=repo, commit_model=models.Commit)
+
+
 class CreateRepo(PeeweeRequestHandler):
     title = 'Добавить репозиторий'
     response = None
@@ -42,14 +50,16 @@ class CreateRepo(PeeweeRequestHandler):
 
         response = json.loads(self.response.body.decode())
 
+        # Сохраняем репозиторий и его коммиты в транзакции
         with models.database.atomic():
             repo.save()
-            models.Commit.insert_many(get_commit_from_json(response, repo=repo)).execute()
+            models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('index'))
+        self.redirect(self.reverse_url('details', repo.id))
 
     @gen.coroutine
     def get_commits(self, url):
+        """получения коммитов репозитория вынесено"""
         # https://developer.github.com/v3/#user-agent-required
         http_client = AsyncHTTPClient(defaults=dict(user_agent=GITHUB_USERAGENT))
         self.response = yield http_client.fetch(url)

@@ -3,17 +3,21 @@
 {% block body %}
     <h1>Репозитории</h1>
     <br/>
-
-    <table class="table">
-      <thead>
-          <tr><th>Имя</th><th>Дата создания</th></tr>
-      </thead>
-      {% for repo in repos %}
-        <tr>
-          <td>{{repo.name}}</td>
-           <td>{{repo.date_added}}</td>
-        </tr>
-      {% end %}
-    </table>
-    <a class="btn btn-default" href="{{reverse_url('create_repo')}}" role="button">Добавить репозиторий</a>
+    {% if repos %}
+        <table class="table">
+          <thead>
+              <tr><th>Имя</th><th>Дата создания</th><th>Владелец</th></tr>
+          </thead>
+          {% for repo in repos %}
+            <tr>
+              <td><a href="{{reverse_url('details', repo.id)}}">{{repo.name}}</a></td>
+              <td>{{repo.date_added}}</td>
+              <td>{{repo.owner_name}}</td>
+            </tr>
+          {% end %}
+        </table>
+    {% else %}
+        <p>записей нет</p>
+    {% end %}
+    <a class="btn btn-default" href="{{reverse_url('create')}}" role="button">Добавить репозиторий</a>
 {% end %}
