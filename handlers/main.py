@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import json
-
 from tornado import gen
+from tornado.escape import json_decode
 from tornado.httpclient import AsyncHTTPClient
 
 import forms
@@ -48,7 +47,7 @@ class CreateRepo(PeeweeRequestHandler):
 
         yield self.get_commits(url)
 
-        response = json.loads(self.response.body.decode())
+        response = json_decode(self.response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
         with models.database.atomic():
