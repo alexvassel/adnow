@@ -10,6 +10,8 @@ from models import database
 APP_SETTINGS = {'template_path': 'tpls', 'debug': True,
                 'cookie_secret': 'some_secret', 'autoescape': None}
 
+GHUB_PATTERN = 'https://github.com/<имя пользователя>/<имя репозитория>'
+
 # Регулярное выражение для проверко корректности введенного пользователем адреса репозитория
 GHUB_URL = re.compile(r'https://github.com/(?P<owner_name>[\w]{1,99})/(?P<repo_name>[\w]{1,99})$')
 
