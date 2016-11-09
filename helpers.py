@@ -13,7 +13,7 @@ APP_SETTINGS = {'template_path': 'tpls', 'debug': True,
 GHUB_PATTERN = 'https://github.com/<имя пользователя>/<имя репозитория>'
 
 # Регулярное выражение для проверко корректности введенного пользователем адреса репозитория
-GHUB_URL = re.compile(r'https://github.com/(?P<owner_name>[\w]{1,99})/(?P<repo_name>[\w]{1,99})$')
+GHUB_URL = re.compile(r'https://github.com/(?P<owner_name>[\w-]{1,99})/(?P<repo_name>[\w-]{1,99})$')
 
 # Щаблон адреса githib API
 API_PATTERN = 'https://api.github.com/repos/{}/{}/commits'
