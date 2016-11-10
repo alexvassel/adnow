@@ -74,6 +74,8 @@ def get_next_page(header):
     Возвращаем словари вида {'rel="next"': '<https://api.github.com/repositories/4164482/commits?page=782>'}
     """
     r = {}
+    if not header:
+        return r
     parts = header.split(', ')
     for part in parts:
         value, key = part.split('; ')
