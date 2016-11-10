@@ -9,6 +9,7 @@ application = web.Application([
                 web.URLSpec(r'/', main.Repos, name='index'),
                 web.URLSpec(r'/repos/create', main.CreateRepo, name='create'),
                 web.URLSpec(r'/repos/(\d+)', main.RepoDetails, name='details'),
+                web.URLSpec(r'/repos/(\d+)/update', main.UpdateRepo, name='update')
     ], **APP_SETTINGS)
 
 http_server = httpserver.HTTPServer(application)

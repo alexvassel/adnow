@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 from tornado import gen
 from tornado.escape import json_decode
-from tornado.httpclient import AsyncHTTPClient
 
 import forms
-from helpers import (PeeweeRequestHandler, GHUB_URL, API_PATTERN, GITHUB_USERAGENT,
-                     get_commit_from_json)
+from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json
 import models
 
 
-class Repos(PeeweeRequestHandler):
+class Repos(BaseHandler):
     title = 'Репозитории'
 
     def get(self):
@@ -17,7 +15,7 @@ class Repos(PeeweeRequestHandler):
         self.render('index.html', title=self.title, repos=repos)
 
 
-class RepoDetails(PeeweeRequestHandler):
+class RepoDetails(BaseHandler):
     title = 'Коммиты репозитория'
 
     def get(self, repo_id):
@@ -25,7 +23,7 @@ class RepoDetails(PeeweeRequestHandler):
         self.render('details.html', title=self.title, repo=repo, commit_model=models.Commit)
 
 
-class CreateRepo(PeeweeRequestHandler):
+class CreateRepo(BaseHandler):
     title = 'Добавить репозиторий'
     response = None
 
@@ -47,6 +45,8 @@ class CreateRepo(PeeweeRequestHandler):
 
         yield self.get_commits(url)
 
+        repo.next_page = self.get_next_page_link()
+
         response = json_decode(self.response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
@@ -56,10 +56,21 @@ class CreateRepo(PeeweeRequestHandler):
 
         self.redirect(self.reverse_url('details', repo.id))
 
+
+class UpdateRepo(BaseHandler):
     @gen.coroutine
-    def get_commits(self, url):
-        """получение коммитов репозитория вынесено"""
-        # API отдает последние 30
-        # https://developer.github.com/v3/#user-agent-required
-        http_client = AsyncHTTPClient(defaults=dict(user_agent=GITHUB_USERAGENT))
-        self.response = yield http_client.fetch(url)
+    def post(self, repo_id):
+        repo = models.Repo.get(id=repo_id)
+
+        yield self.get_commits(repo.next_page)
+
+        repo.next_page = self.get_next_page_link()
+
+        response = json_decode(self.response.body.decode())
+
+        # Сохраняем репозиторий и его коммиты в транзакции
+        with models.database.atomic():
+            repo.save()
+            models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
+
+        self.redirect(self.reverse_url('details', repo_id))

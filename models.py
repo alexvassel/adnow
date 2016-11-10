@@ -4,7 +4,7 @@ import datetime
 
 import peewee
 
-# БД создасться в корне директории проекта
+# БД создастся в корне директории проекта
 DB = 'repos.sqlite'
 
 database = peewee.SqliteDatabase(DB)
@@ -23,6 +23,7 @@ class Repo(Base):
     name = peewee.CharField(max_length=20)
     date_added = peewee.DateTimeField(default=datetime.datetime.utcnow)
     owner_name = peewee.CharField(max_length=20)
+    next_page = peewee.CharField(null=True)
 
 
 class Commit(Base):
