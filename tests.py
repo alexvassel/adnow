@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import json
 import unittest
 
-from helpers import get_next_page
+from helpers import get_next_page, get_commit_from_json
 
 
 class HeaderParsingTest(unittest.TestCase):
@@ -25,6 +25,27 @@ class HeaderParsingTest(unittest.TestCase):
             self.assertRaises(AttributeError, get_next_page, obj)
         self.assertRaises(TypeError, get_next_page)
         self.assertRaises(ValueError, get_next_page, ' ')
+
+
+class JsonParsingTest(unittest.TestCase):
+    EXPECT = {'id': 42, 'keys': ['author', 'sha', 'date_added', 'message', 'repo']}
+
+    data = open('fixtures/commits.json')
+
+    def test_common(self):
+        self.assertRaises(TypeError, get_commit_from_json)
+        self.assertRaises(TypeError, get_commit_from_json, '')
+
+        for d in get_commit_from_json('', ''):
+            self.assertIs(d, None)
+
+    def test_json_parsing(self):
+        jsn = json.load(self.data)
+
+        for r in get_commit_from_json(jsn, self.EXPECT['id']):
+            self.assertIsInstance(r, dict)
+            self.assertEqual(r['repo'], self.EXPECT['id'])
+            self.assertListEqual(sorted(r), sorted(self.EXPECT['keys']))
 
 
 if __name__ == '__main__':
