@@ -18,5 +18,5 @@
 
 * pip install -r reqs.txt (ставим зависимости)
 * python helpers.py (создаем БД)
-* python app.py -v (запускаем приложение)
-* python tests.py (запускаем тесты)
+* python app.py (запускаем приложение)
+* python tests.py -v (запускаем тесты)
