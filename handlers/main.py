@@ -36,6 +36,7 @@ class CreateRepo(BaseHandler):
 
         if not form.validate():
             self.render('create.html', title=self.title, form=form)
+            return
 
         owner_name, repo_name = GHUB_URL.match(form.href.data).groups()
 
