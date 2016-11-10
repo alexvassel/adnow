@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+
 from helpers import get_next_page
 
 
-class HeaderTest(unittest.TestCase):
+class HeaderParsingTest(unittest.TestCase):
     data = '''<https://api.github.com/repositories/4164482/commits?page=782>; rel="next", <https://api.github.com/repositories/4164482/commits?page=782>; rel="last", <https://api.github.com/repositories/4164482/commits?page=1>; rel="first", <https://api.github.com/repositories/4164482/commits?page=780>; rel="prev"'''
 
     def test_header_parsing(self):
@@ -26,5 +27,5 @@ class HeaderTest(unittest.TestCase):
         self.assertRaises(ValueError, get_next_page, ' ')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
