@@ -85,6 +85,7 @@ class UpdateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        page = math.ceil(models.Commit.select().count() / COMMITS['per_page'])
+        page = math.ceil(models.Commit.select().where(models.Commit.repo == repo).count() /
+                         COMMITS['per_page'])
 
         self.redirect(self.reverse_url('view', repo_id, page))
