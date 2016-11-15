@@ -24,6 +24,7 @@ class ViewRepo(BaseHandler):
         page = int(page)
         repo = models.Repo.get(id=repo_id)
         all_commits = models.Commit.select().where(models.Commit.repo == repo)
+        # Для постраничного вывода коммитов
         commits = (all_commits.order_by(models.Commit.date_added.desc()).
                    paginate(page, COMMITS['per_page']))
         total_records = all_commits.count()
@@ -50,15 +51,12 @@ class CreateRepo(BaseHandler):
             return
 
         owner_name, repo_name = GHUB_URL.match(form.href.data).groups()
-
         repo = models.Repo(name=repo_name, owner_name=owner_name, href=form.href.data)
-
         url = API_PATTERN.format(owner_name, repo_name)
 
         yield self.get_commits(url)
 
         repo.next_page = self.get_next_page_link()
-
         response = json_decode(self.response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
@@ -77,7 +75,6 @@ class UpdateRepo(BaseHandler):
         yield self.get_commits(repo.next_page)
 
         repo.next_page = self.get_next_page_link()
-
         response = json_decode(self.response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
@@ -88,4 +85,5 @@ class UpdateRepo(BaseHandler):
         page = math.ceil(models.Commit.select().where(models.Commit.repo == repo).count() /
                          COMMITS['per_page'])
 
+        # Редирект на последнюю страницу
         self.redirect(self.reverse_url('view', repo_id, page))
