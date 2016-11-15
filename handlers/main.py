@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import math
+
 from tornado import gen
 from tornado.escape import json_decode
 
 import forms
-from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json
+from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json, COMMITS
 import models
 
 
@@ -18,9 +20,18 @@ class ShowRepos(BaseHandler):
 class ViewRepo(BaseHandler):
     title = 'Коммиты репозитория'
 
-    def get(self, repo_id):
+    def get(self, repo_id, page):
+        page = int(page)
         repo = models.Repo.get(id=repo_id)
-        self.render('details.html', title=self.title, repo=repo, commit_model=models.Commit)
+        all_commits = models.Commit.select().where(models.Commit.repo == repo)
+        commits = (all_commits.order_by(models.Commit.date_added.desc()).
+                   paginate(page, COMMITS['per_page']))
+        total_records = all_commits.count()
+        last_page = math.ceil(total_records / COMMITS['per_page'])
+
+        self.render('details.html', title=self.title, repo=repo, commits=commits,
+                    last_page=last_page, page=page, per_page=COMMITS['per_page'],
+                    total_records=total_records)
 
 
 class CreateRepo(BaseHandler):
@@ -55,7 +66,7 @@ class CreateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('view', repo.id))
+        self.redirect(self.reverse_url('view', repo.id, 1))
 
 
 class UpdateRepo(BaseHandler):
@@ -74,4 +85,6 @@ class UpdateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('view', repo_id))
+        page = math.ceil(models.Commit.select().count() / COMMITS['per_page'])
+
+        self.redirect(self.reverse_url('view', repo_id, page))

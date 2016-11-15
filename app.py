@@ -8,7 +8,7 @@ from helpers import APP_SETTINGS
 application = web.Application([
                 web.URLSpec(r'/', main.ShowRepos, name='index'),
                 web.URLSpec(r'/repos/create', main.CreateRepo, name='create'),
-                web.URLSpec(r'/repos/(\d+)', main.ViewRepo, name='view'),
+                web.URLSpec(r'/repos/(\d+)/(\d+)', main.ViewRepo, name='view'),
                 web.URLSpec(r'/repos/(\d+)/update', main.UpdateRepo, name='update')
     ], **APP_SETTINGS)
 
