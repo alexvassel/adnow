@@ -7,7 +7,7 @@ from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json
 import models
 
 
-class Repos(BaseHandler):
+class ShowRepos(BaseHandler):
     title = 'Репозитории'
 
     def get(self):
@@ -15,7 +15,7 @@ class Repos(BaseHandler):
         self.render('index.html', title=self.title, repos=repos)
 
 
-class RepoDetails(BaseHandler):
+class ViewRepo(BaseHandler):
     title = 'Коммиты репозитория'
 
     def get(self, repo_id):
@@ -55,7 +55,7 @@ class CreateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('details', repo.id))
+        self.redirect(self.reverse_url('view', repo.id))
 
 
 class UpdateRepo(BaseHandler):
@@ -74,4 +74,4 @@ class UpdateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('details', repo_id))
+        self.redirect(self.reverse_url('view', repo_id))

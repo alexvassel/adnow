@@ -10,7 +10,7 @@
           </thead>
           {% for repo in repos %}
             <tr>
-              <td><a href="{{reverse_url('details', repo.id)}}">{{repo.name}}</a></td>
+              <td><a href="{{reverse_url('view', repo.id)}}">{{repo.name}}</a></td>
               <td>{{repo.date_added}}</td>
               <td>{{repo.owner_name}}</td>
             </tr>
