@@ -5,16 +5,13 @@ from tornado import gen
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import RequestHandler
 
-from models import Repo, Commit
-
-from models import database
+from models import Repo, Commit, database
 
 COMMITS = dict(per_page=30)
 
 REPOS = dict(per_page=4)
 
-APP_SETTINGS = {'template_path': 'templates', 'debug': True,
-                'cookie_secret': 'some_secret', 'autoescape': None}
+APP_SETTINGS = {'template_path': 'templates', 'debug': True}
 
 GHUB_PATTERN = 'https://github.com/<имя пользователя>/<имя репозитория>'
 
