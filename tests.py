@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from http import client
 import json
+from urllib.parse import urlencode
+
+import os
 import unittest
 
 from tornado.testing import AsyncHTTPTestCase
@@ -11,18 +14,18 @@ from models import DB
 
 
 class ApplicationTestCase(AsyncHTTPTestCase):
-    REPO_ADDRESS = 'https://github.com/alexvassel/adnow'
+    BAD_REPO_ADDRESS = 'https://github.com/alexvassel/adnow/'
 
     def get_app(self):
         return application
 
     def setUp(self):
-        try:
-            open(DB)
-        except FileNotFoundError:
-            create_tables()
-        finally:
-            super().setUp()
+        create_tables()
+        super().setUp()
+
+    def tearDown(self):
+        os.remove(DB)
+        super().tearDown()
 
     def test_redirect(self):
         response = self.fetch(self.get_app().reverse_url('index'), follow_redirects=False)
@@ -31,6 +34,14 @@ class ApplicationTestCase(AsyncHTTPTestCase):
     def test_index(self):
         response = self.fetch(self.get_app().reverse_url('index'))
         self.assertEqual(response.code, client.OK)
+
+    def test_create_repo(self):
+        response = self.fetch(self.get_app().reverse_url('create'), method='POST', body='')
+        self.assertIn('errors', response.body.decode())
+        data = {'href': self.BAD_REPO_ADDRESS}
+        response = self.fetch(self.get_app().reverse_url('create'), method='POST',
+                              body=urlencode(data).encode())
+        self.assertIn('errors', response.body.decode())
 
 
 class HeaderParsingTest(unittest.TestCase):
