@@ -1,0 +1,11 @@
+<nav>
+  <ul class="pager">
+        <li {% if page == 1 %}class="disabled"{% end %}>
+            <a href="{% if page == 1 %}#{% else %}?page={{page - 1}}{% end %}"><-</a>
+        </li>
+        <span>Страница - {{page}}, выводим по {{per_page}}, всего {{total_records}}</span>
+        <li {% if page == last_page %}class="disabled"{% end %}>
+            <a href="{% if page == last_page %}#{% else %}?page={{page + 1}}{% end %}">-></a>
+        </li>
+  </ul>
+</nav>
