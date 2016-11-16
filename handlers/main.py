@@ -12,9 +12,9 @@ import models
 class ShowRepos(BaseHandler):
     title = 'Репозитории'
 
-    def get(self, page):
+    def get(self):
         all_repos = models.Repo.select()
-        page = int(page)
+        page = int(self.get_argument('page', 1))
         per_page = REPOS['per_page']
         repos = (all_repos.order_by(models.Repo.date_added.desc()).
                  paginate(page, REPOS['per_page']))
@@ -27,8 +27,8 @@ class ShowRepos(BaseHandler):
 class ViewRepo(BaseHandler):
     title = 'Коммиты репозитория'
 
-    def get(self, repo_id, page):
-        page = int(page)
+    def get(self, repo_id):
+        page = int(self.get_argument('page', 1))
         repo = models.Repo.get(id=repo_id)
         all_commits = models.Commit.select().where(models.Commit.repo == repo)
         # Для постраничного вывода коммитов
@@ -71,7 +71,7 @@ class CreateRepo(BaseHandler):
             repo.save()
             models.Commit.insert_many(get_commit_from_json(response, repo=repo.id)).execute()
 
-        self.redirect(self.reverse_url('view', repo.id, 1))
+        self.redirect(self.reverse_url('view', repo.id))
 
 
 class UpdateRepo(BaseHandler):
@@ -93,4 +93,4 @@ class UpdateRepo(BaseHandler):
                          COMMITS['per_page'])
 
         # Редирект на последнюю страницу
-        self.redirect(self.reverse_url('view', repo_id, page))
+        self.redirect(self.reverse_url('view', repo_id) + '?page={}'.format(page))
