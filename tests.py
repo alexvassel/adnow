@@ -1,8 +1,28 @@
 # -*- coding: utf-8 -*-
+from http import client
 import json
 import unittest
 
+from tornado.testing import AsyncHTTPTestCase
+
 from helpers import get_next_page, get_commit_from_json
+
+from app import application
+
+
+class ApplicationTestCase(AsyncHTTPTestCase):
+    REPO_ADDRESS = 'https://github.com/alexvassel/adnow'
+
+    def get_app(self):
+        return application
+
+    def test_redirect(self):
+        response = self.fetch(self.get_app().reverse_url('index'), follow_redirects=False)
+        self.assertEqual(response.code, client.MOVED_PERMANENTLY)
+
+    def test_index(self):
+        response = self.fetch(self.get_app().reverse_url('index'))
+        self.assertEqual(response.code, client.OK)
 
 
 class HeaderParsingTest(unittest.TestCase):
