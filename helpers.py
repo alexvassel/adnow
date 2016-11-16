@@ -11,7 +11,7 @@ COMMITS = dict(per_page=30)
 
 REPOS = dict(per_page=4)
 
-APP_SETTINGS = {'template_path': 'templates', 'debug': True}
+APP_SETTINGS = {'template_path': 'templates', 'debug': True, 'autoescape': None}
 
 GHUB_PATTERN = 'https://github.com/<имя пользователя>/<имя репозитория>'
 
