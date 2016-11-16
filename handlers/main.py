@@ -5,16 +5,23 @@ from tornado import gen
 from tornado.escape import json_decode
 
 import forms
-from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json, COMMITS
+from helpers import BaseHandler, GHUB_URL, API_PATTERN, get_commit_from_json, COMMITS, REPOS
 import models
 
 
 class ShowRepos(BaseHandler):
     title = 'Репозитории'
 
-    def get(self):
-        repos = models.Repo.select().order_by(models.Repo.date_added.desc())
-        self.render('index.html', title=self.title, repos=repos)
+    def get(self, page):
+        all_repos = models.Repo.select()
+        page = int(page)
+        per_page = REPOS['per_page']
+        repos = (all_repos.order_by(models.Repo.date_added.desc()).
+                 paginate(page, REPOS['per_page']))
+        total_records = all_repos.count()
+        last_page = math.ceil(total_records / REPOS['per_page'])
+        self.render('show.html', title=self.title, repos=repos, page=page, per_page=per_page,
+                    total_records=total_records, last_page=last_page)
 
 
 class ViewRepo(BaseHandler):

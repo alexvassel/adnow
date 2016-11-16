@@ -11,6 +11,8 @@ from models import database
 
 COMMITS = dict(per_page=30)
 
+REPOS = dict(per_page=4)
+
 APP_SETTINGS = {'template_path': 'templates', 'debug': True,
                 'cookie_secret': 'some_secret', 'autoescape': None}
 

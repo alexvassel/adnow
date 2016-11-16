@@ -16,17 +16,7 @@
             </tr>
           {% end %}
         </table>
-        <nav>
-          <ul class="pager">
-                <li {% if page == 1 %}class="disabled"{% end %}>
-                    <a href="{% if page == 1 %}#{% else %}{{page - 1}}{% end %}"><-</a>
-                </li>
-                <span>Страница - {{page}}, выводим по {{per_page}}, всего {{total_records}}</span>
-                <li {% if page == last_page %}class="disabled"{% end %}>
-                    <a href="{% if page == last_page %}#{% else %}{{page + 1}}{% end %}">-></a>
-                </li>
-          </ul>
-        </nav>
+        {% include 'parts/paginator.html' %}
     {% else %}
             <p>записей нет</p>
     {% end %}
@@ -34,7 +24,7 @@
         {% if repo.next_page %}
             <div align="center">
                 <form method="POST" action="{{reverse_url('update', repo.id)}}">
-                    <input class="btn btn-default" type="submit" value="Подгрузить еще 30 коммитов"/>
+                    <input class="btn btn-default" type="submit" value="Подгрузить еще {{per_page}}"/>
                 </form>
             </div>
         {% end %}
