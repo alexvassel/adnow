@@ -5,9 +5,9 @@ import unittest
 
 from tornado.testing import AsyncHTTPTestCase
 
-from helpers import get_next_page, get_commit_from_json
-
 from app import application
+from helpers import get_next_page, get_commit_from_json, create_tables
+from models import DB
 
 
 class ApplicationTestCase(AsyncHTTPTestCase):
@@ -15,6 +15,14 @@ class ApplicationTestCase(AsyncHTTPTestCase):
 
     def get_app(self):
         return application
+
+    def setUp(self):
+        try:
+            open(DB)
+        except FileNotFoundError:
+            create_tables()
+        finally:
+            super().setUp()
 
     def test_redirect(self):
         response = self.fetch(self.get_app().reverse_url('index'), follow_redirects=False)
