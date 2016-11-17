@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from http import client
+import io
 import json
 from urllib.parse import urlencode
-
 import os
 import unittest
 
+import mock
+from tornado.httpclient import HTTPRequest, HTTPResponse
+from tornado.concurrent import Future
 from tornado.testing import AsyncHTTPTestCase
 
 from app import application
@@ -19,10 +22,9 @@ class ApplicationTestCase(AsyncHTTPTestCase):
                      owner_name='test_owner_name', next_page='test_next_page')
     TEST_COMMIT = dict(author='test_author', message='test_message', sha='test_sha',
                        date_added=datetime.now())
-
     MESSAGES = dict(get_more='Подгрузить еще', no_records='записей нет')
-
     TEST_COUNT = 3
+    data = open('fixtures/commits.json')
 
     def get_app(self):
         return application
@@ -82,6 +84,26 @@ class ApplicationTestCase(AsyncHTTPTestCase):
         response = self.fetch(self.get_app().reverse_url('view', repo.id))
 
         self.assertNotIn(self.MESSAGES['get_more'], response.body.decode())
+
+    @mock.patch('helpers.BaseHandler.get_commits')
+    def test_commits_create(self, get_commits):
+        fixtures = self.data.buffer.read()
+        jsn = json.loads(fixtures.decode())
+
+        request = HTTPRequest(self.TEST_REPO['href'])
+        response = HTTPResponse(request, client.OK, buffer=io.BytesIO(fixtures))
+
+        future = Future()
+        future.set_result(response)
+        get_commits.return_value = future
+
+        body = {'href': self.TEST_REPO['href']}
+        response = self.fetch(self.get_app().reverse_url('create'), method='POST',
+                              body=urlencode(body).encode())
+
+        self.assertIn('всего {}'.format(len(jsn)), response.body.decode())
+        self.assertEqual(len(jsn), Commit.select().count())
+        self.assertEqual(1, Repo.select().count())
 
 
 class HeaderParsingTest(unittest.TestCase):

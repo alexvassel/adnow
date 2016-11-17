@@ -43,11 +43,12 @@ class BaseHandler(RequestHandler):
         """получение коммитов репозитория вынесено"""
         # https://developer.github.com/v3/#user-agent-required
         http_client = AsyncHTTPClient(defaults=dict(user_agent=GITHUB_USERAGENT))
-        self.response = yield http_client.fetch(url)
+        response = yield http_client.fetch(url)
+        return response
 
-    def get_next_page_link(self):
-        if self.response.headers.get('Link') is not None:
-            links = get_next_page(self.response.headers['Link'])
+    def get_next_page_link(self, response):
+        if response.headers.get('Link') is not None:
+            links = get_next_page(response.headers['Link'])
             if links.get('rel="next"') is not None:
                 return links['rel="next"'][1:-1]
 

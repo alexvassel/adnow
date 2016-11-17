@@ -58,16 +58,13 @@ class CreateRepo(BaseHandler):
             return
 
         owner_name, repo_name = GHUB_URL.match(form.href.data).groups()
-
         repo = models.Repo(name=repo_name, owner_name=owner_name, href=form.href.data)
-
         url = API_PATTERN.format(owner_name, repo_name)
 
-        yield self.get_commits(url)
+        response = yield self.get_commits(url)
 
-        repo.next_page = self.get_next_page_link()
-
-        response = json_decode(self.response.body.decode())
+        repo.next_page = self.get_next_page_link(response)
+        response = json_decode(response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
         with models.database.atomic():
@@ -82,11 +79,10 @@ class UpdateRepo(BaseHandler):
     def post(self, repo_id):
         repo = models.Repo.get(id=repo_id)
 
-        yield self.get_commits(repo.next_page)
+        response = yield self.get_commits(repo.next_page)
 
-        repo.next_page = self.get_next_page_link()
-
-        response = json_decode(self.response.body.decode())
+        repo.next_page = self.get_next_page_link(response)
+        response = json_decode(response.body.decode())
 
         # Сохраняем репозиторий и его коммиты в транзакции
         with models.database.atomic():
