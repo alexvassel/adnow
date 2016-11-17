@@ -17,6 +17,6 @@
 Установка и запуск:
 
 * pip install -r reqs.txt (ставим зависимости)
-* python helpers.py (создаем БД)
-* python app.py (запускаем приложение)
 * python tests.py -v (запускаем тесты)
+* python helpers.py (создаем БД)
+* python run.py (запускаем приложение)

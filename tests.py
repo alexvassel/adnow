@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from http import client
 import json
 from urllib.parse import urlencode
@@ -10,11 +11,18 @@ from tornado.testing import AsyncHTTPTestCase
 
 from app import application
 from helpers import get_next_page, get_commit_from_json, create_tables
-from models import DB
+from models import DB, Repo, Commit
 
 
 class ApplicationTestCase(AsyncHTTPTestCase):
-    BAD_REPO_ADDRESS = 'https://github.com/alexvassel/adnow/'
+    TEST_REPO = dict(href='https://github.com/alexvassel/adnow', name='test_name',
+                     owner_name='test_owner_name', next_page='test_next_page')
+    TEST_COMMIT = dict(author='test_author', message='test_message', sha='test_sha',
+                       date_added=datetime.now())
+
+    MESSAGES = dict(get_more='Подгрузить еще', no_records='записей нет')
+
+    TEST_COUNT = 3
 
     def get_app(self):
         return application
@@ -36,12 +44,44 @@ class ApplicationTestCase(AsyncHTTPTestCase):
         self.assertEqual(response.code, client.OK)
 
     def test_create_repo(self):
+        response = self.fetch(self.get_app().reverse_url('create'))
+        self.assertNotIn('errors', response.body.decode())
         response = self.fetch(self.get_app().reverse_url('create'), method='POST', body='')
         self.assertIn('errors', response.body.decode())
-        data = {'href': self.BAD_REPO_ADDRESS}
+        data = {'href': self.TEST_REPO['href'] + '/'}
         response = self.fetch(self.get_app().reverse_url('create'), method='POST',
                               body=urlencode(data).encode())
         self.assertIn('errors', response.body.decode())
+
+    def test_repo_commits(self):
+        repo = Repo.create(**self.TEST_REPO)
+        repo.save()
+
+        response = self.fetch(self.get_app().reverse_url('view', repo.id))
+
+        self.assertIn(self.MESSAGES['no_records'], response.body.decode())
+
+        self.assertIn(self.MESSAGES['get_more'], response.body.decode())
+
+        for commit in range(self.TEST_COUNT):
+            commit_data = self.TEST_COMMIT
+            commit_data.update({'repo': repo})
+            c = Commit(**commit_data)
+            c.save()
+
+        response = self.fetch(self.get_app().reverse_url('view', repo.id))
+
+        self.assertEqual(response.body.decode().count(self.TEST_COMMIT['message']),
+                         self.TEST_COUNT)
+
+        self.assertIn(self.MESSAGES['get_more'], response.body.decode())
+
+        repo.next_page = None
+        repo.save()
+
+        response = self.fetch(self.get_app().reverse_url('view', repo.id))
+
+        self.assertNotIn(self.MESSAGES['get_more'], response.body.decode())
 
 
 class HeaderParsingTest(unittest.TestCase):
